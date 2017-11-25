@@ -1,0 +1,140 @@
+---
+title: "Practical Machine Learning Assignment"
+author: "Wilson Kok"
+date: "November 23, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Introduction
+
+For this assignment, we will examine the training data and create a prediction model for predicting whether the user has completed the correct actions.
+
+## Loading the data
+
+We will load in the train and test sets first.
+
+The dataset is courtesy of the below:
+Ugulino, W.; Cardador, D.; Vega, K.; Velloso, E.; Milidiu, R.; Fuks, H. Wearable Computing: Accelerometers' Data Classification of Body Postures and Movements. Proceedings of 21st Brazilian Symposium on Artificial Intelligence. Advances in Artificial Intelligence - SBIA 2012. In: Lecture Notes in Computer Science. , pp. 52-61. Curitiba, PR: Springer Berlin / Heidelberg, 2012. ISBN 978-3-642-34458-9. DOI: 10.1007/978-3-642-34459-6_6. 
+Cited by 2 (Google Scholar)
+
+```{r loaddata}
+training<-read.csv("pml-training.csv",header = TRUE, sep = ",", na.strings = c(""," ", "NA", "#DIV/0!"))
+testing<-read.csv("pml-testing.csv",header = TRUE, sep = ",", na.strings = c(""," ", "NA", "#DIV/0!"))
+```
+
+## Basic data exploration
+
+```{r explore}
+names(training)
+```
+
+The interesting column name is classe, this name suggests the classification of action taken by the user.
+
+Furthermore, we can see a few of the columns are timestamps which are irrevelant to the prediction outcome that we want to predict.
+
+Besides those columns, a number of columns have similar names.
+
+Let's take a close look at an example
+
+```{r examine}
+#Take the roll_dumbbell as example
+subtrain<-training[,grepl("roll_dumbbell",names(training))]
+subtrain<-sapply(subtrain,as.numeric)
+cor(x=subtrain,use="complete.obs",method="pearson")
+```
+
+The correlation between some columns suggests confounding, for example, variance and standard deviation, it makes no sense for us to include both columns together. 
+
+For this model, we will remove one column which has >0.7 correlation to another.
+
+## Data Cleansing
+
+Using the discoveries from above, we can now remove some columns. 
+
+```{r removecol}
+training2<-training[, !grepl("timestamp",names(training))]
+training2<-training2[,5:157]
+training2<-training2[, !grepl("avg_",names(training2))]
+training2<-training2[, !grepl("stddev_",names(training2))]
+training2<-training2[, !grepl("amplitude_",names(training2))]
+
+testing2<-testing[, !grepl("timestamp",names(testing))]
+testing2<-testing2[,5:157]
+testing2<-testing2[, !grepl("avg_",names(testing2))]
+testing2<-testing2[, !grepl("stddev_",names(testing2))]
+testing2<-testing2[, !grepl("amplitude_",names(testing2))]
+```
+
+For the next step, we need to check for NA's as random forest algorithym does not allow NA's.
+
+```{r nacheck}
+checkNA<-function(x){sum(is.na(x))}
+sapply(training2,checkNA)
+```
+
+## Handling NA data
+
+There are a few variables which have too many NA's. For modelling purposes, we should remove these columns as they're not very helpful.
+
+```{r explore2}
+checkNA<-function(x){
+  (sum(is.na(x))/length(x))>0.95
+}
+tooManyNA<-sapply(training2,checkNA)
+ftrain<-training2[,!tooManyNA]
+trainsplit <- createDataPartition(ftrain$classe, p = 0.80, list = FALSE)
+ftrain2 <- ftrain[trainsplit, ]
+ftest2 <- ftrain[-trainsplit, ]
+ftest<-testing2[,!tooManyNA]
+length(training$classe)
+```
+
+The end result is just 53 meaningful variables.
+
+## Modeling
+
+So for our first model, we will use the default settings and all columns with the standard random forest approach as random forest is the most accurate in predicting a factor variable.
+
+However, the random forest algorithym is very slow for an average computer, we will use parallel processsing for better performance as suggested in the forums: https://github.com/lgreski/datasciencectacontent/blob/master/markdown/pml-randomForestPerformance.md
+
+```{r model, cache=TRUE}
+library(caret)
+library(parallel)
+library(doParallel)
+
+cluster <- makeCluster(detectCores()- 1)
+registerDoParallel(cluster)
+
+#Set seed to ensure reproducibility
+set.seed(1234)
+fitControl <- trainControl(method = "cv",number = 5, allowParallel = TRUE)
+model<-train(classe~.,data=ftrain2,method="rf",trainControl = fitControl)
+# Stop Cluster 
+stopCluster(cluster)
+registerDoSEQ()
+#Print the model
+model
+```
+
+## Evaluate the model
+
+After the model has been built, we can now test it against the testing data.
+
+```{r evalmodel}
+result <- predict(model, newdata = ftest2)
+#Check the accuracy
+confusionMatrix(ftest2$classe, result)
+```
+
+## Quiz Test
+
+As shown as below, the model accurately predicts the results of the course project quiz.
+
+```{r quiz}
+result2<-predict(model,newdata = ftest)
+result2
+```
