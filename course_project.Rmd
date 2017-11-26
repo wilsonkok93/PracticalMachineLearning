@@ -7,6 +7,7 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(caret)
 ```
 
 ## Introduction
@@ -129,6 +130,10 @@ result <- predict(model, newdata = ftest2)
 #Check the accuracy
 confusionMatrix(ftest2$classe, result)
 ```
+
+## Out of sample rate error
+
+The out of sample rate error is 1-0.9954= 0.0046. Which equates to around 0.4%. This model is very accurate, this can regarded as the final model chosen.
 
 ## Quiz Test
 

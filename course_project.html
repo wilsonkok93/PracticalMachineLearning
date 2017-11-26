@@ -441,32 +441,36 @@ confusionMatrix(ftest2$classe, result)</code></pre>
 ##           Reference
 ## Prediction    A    B    C    D    E
 ##          A 1115    0    1    0    0
-##          B    2  756    0    1    0
-##          C    0    2  679    3    0
-##          D    0    0    7  636    0
-##          E    0    0    0    1  720
+##          B    0  758    0    1    0
+##          C    0    0  683    1    0
+##          D    0    0    0  643    0
+##          E    0    0    0    0  721
 ## 
 ## Overall Statistics
 ##                                           
-##                Accuracy : 0.9957          
-##                  95% CI : (0.9931, 0.9975)
-##     No Information Rate : 0.2847          
+##                Accuracy : 0.9992          
+##                  95% CI : (0.9978, 0.9998)
+##     No Information Rate : 0.2842          
 ##     P-Value [Acc &gt; NIR] : &lt; 2.2e-16       
 ##                                           
-##                   Kappa : 0.9945          
+##                   Kappa : 0.999           
 ##  Mcnemar's Test P-Value : NA              
 ## 
 ## Statistics by Class:
 ## 
 ##                      Class: A Class: B Class: C Class: D Class: E
-## Sensitivity            0.9982   0.9974   0.9884   0.9922   1.0000
-## Specificity            0.9996   0.9991   0.9985   0.9979   0.9997
-## Pos Pred Value         0.9991   0.9960   0.9927   0.9891   0.9986
-## Neg Pred Value         0.9993   0.9994   0.9975   0.9985   1.0000
-## Prevalence             0.2847   0.1932   0.1751   0.1634   0.1835
-## Detection Rate         0.2842   0.1927   0.1731   0.1621   0.1835
+## Sensitivity            1.0000   1.0000   0.9985   0.9969   1.0000
+## Specificity            0.9996   0.9997   0.9997   1.0000   1.0000
+## Pos Pred Value         0.9991   0.9987   0.9985   1.0000   1.0000
+## Neg Pred Value         1.0000   1.0000   0.9997   0.9994   1.0000
+## Prevalence             0.2842   0.1932   0.1744   0.1644   0.1838
+## Detection Rate         0.2842   0.1932   0.1741   0.1639   0.1838
 ## Detection Prevalence   0.2845   0.1935   0.1744   0.1639   0.1838
-## Balanced Accuracy      0.9989   0.9982   0.9934   0.9950   0.9998</code></pre>
+## Balanced Accuracy      0.9998   0.9998   0.9991   0.9984   1.0000</code></pre>
+</div>
+<div id="out-of-sample-rate-error" class="section level2">
+<h2>Out of sample rate error</h2>
+<p>The out of sample rate error is 1-0.9954= 0.0046. Which equates to around 0.4%. This model is very accurate, this can regarded as the final model chosen.</p>
 </div>
 <div id="quiz-test" class="section level2">
 <h2>Quiz Test</h2>
